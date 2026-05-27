@@ -104,8 +104,8 @@ label start:
         zoom 4.0
     with fade
     
-    call prologue
-    call main_hub
+    call prologue from _call_prologue
+    call main_hub from _call_main_hub
     return
 
 label prologue:
@@ -192,21 +192,22 @@ label main_hub:
     menu hub_menu:
         "Что я должен делать?"
         "Памятка":
-            call memo_screen
+            call memo_screen from _call_memo_screen
             jump main_hub
         "Архив":
-            call archive_room
+            call archive_room from _call_archive_room
             jump main_hub
         "Допросная":
-            call suspect_selection
+            call suspect_selection from _call_suspect_selection
             jump main_hub
         "Выйти покурить" if interrogated_count >= 1 and not met_jean:
-            call corridor_scene
+            call corridor_scene from _call_corridor_scene
             jump main_hub
-        "Осмотреть стол 325-1" if silas_q4_asked:
+        "Осмотреть стол 325-1" if silas_q4_asked and not got_gun:
             player "Хм, какие-то бумаги, семейная фотография, у Сайласа еще были свои руки..."
             player "В шкафу лежит пистолет, странно, огнестрельное оружие выведено из экспуатации более 53 лет назад, возьму как улику"
             $ got_gun = True
+            jump main_hub
         "Закончить допрос (вынести решение)" if interrogated_count >= 3 or timer_seconds <= 0:
             jump final_decision
 
@@ -223,19 +224,19 @@ label suspect_selection:
             $ current_suspect = "kyle"
             $ interrogated_kyle = True
             $ interrogated_count += 1
-            call interrogation_kyle
+            call interrogation_kyle from _call_interrogation_kyle
             jump main_hub
         "Ирма Дюваль" if not interrogated_irma:
             $ current_suspect = "irma"
             $ interrogated_irma = True
             $ interrogated_count += 1
-            call interrogation_irma
+            call interrogation_irma from _call_interrogation_irma
             jump main_hub
         "Сайлас Нго" if not interrogated_silas:
             $ current_suspect = "silas"
             $ interrogated_silas = True
             $ interrogated_count += 1
-            call interrogation_silas
+            call interrogation_silas from _call_interrogation_silas
             jump main_hub
         "Назад":
             jump main_hub
@@ -255,16 +256,16 @@ label archive_menu:
     menu:
         "Просмотреть досье:"
         "Кайл Восс":
-            call dossier_kyle
+            call dossier_kyle from _call_dossier_kyle
             jump archive_menu
         "Ирма Дюваль":
-            call dossier_irma
+            call dossier_irma from _call_dossier_irma
             jump archive_menu
         "Сайлас Нго":
-            call dossier_silas
+            call dossier_silas from _call_dossier_silas
             jump archive_menu
         "[[Скрытый файл: Объект 0]" if player_has_code:
-            call secret_file_0
+            call secret_file_0 from _call_secret_file_0
             jump archive_menu
         "Вернуться в допросную":
             jump main_hub
@@ -843,10 +844,13 @@ label ending_c:
             pause 1.0
             player "*Закрываю глаза*"
             show text "Ли умер чудовищем, а я умраю человеком. Это единственное, что имеет значение." at truecenter
+            pause 2.0
+            hide text
         "Принять свою судьбу":
             player "*Закрываю глаза*"
             show text "Я вспоминаю свое детство, свою первую работу, свой дом...\nЯ не знаю, настоящие ли это воспоминания. Но они мои.\nЯ умраю человеком. Это единственное, что имеет значение." at truecenter
-    
+            pause 2.0
+            hide text
     pause 5.0
     play sound sfx_shock
     centered "Конец."
